@@ -1,174 +1,250 @@
-# Leap Motion Interaction Techniques: Robust Strategies for Unity
+# Roll-A-Ball with Ultraleap Hand Tracking
 
-## 1. Limitations Identified
+A Unity implementation of the classic Roll-a-Ball game enhanced with hand tracking capabilities using Ultraleap (formerly Leap Motion) technology. This project demonstrates advanced gesture-based interaction in 3D gaming environments.
 
-- **SDK Version Differences:** Leap Motion API changes can affect method/property names (`GetIndexFinger`, `Fingers`, `TipPosition`, etc.). Reflection is used to handle these, but is error-prone.
-- **Missing/Incomplete Data:** Sometimes fingertip or pinch strength fields aren’t available, requiring fallback to palm or other heuristics.
-- **Gesture Ambiguity:** Pinch detection is simple, and may cause false positives or negatives if hand tracking is noisy.
+## 🎮 Project Overview
 
-## 2. Proposed Robust Interaction Techniques
+This project extends the traditional Roll-a-Ball game by replacing keyboard controls with intuitive hand tracking gestures. Players can now control the ball using natural hand movements and even "cheat" by picking up the ball with pinch gestures.
 
-### A. **Palm-Based Gestures for Object Manipulation**
-**Technique:** Instead of relying solely on index fingertip position and pinch strength, allow users to interact with objects using their palm’s proximity and orientation.
-- **Implementation:** Use palm position (always available as a fallback) and its facing direction to "hover" over objects. When the palm is close and facing upward, the object can be lifted.
-- **Justification:** Palm position and orientation are consistently reported by Leap Motion, and do not depend on finger data, making this more robust.
+### Key Features
 
-### B. **Thumb-Index Pinch Angle Detection**
-**Technique:** Use the angle between thumb and index fingers, or their proximity, to detect a pinch, instead of relying only on pinch strength.
-- **Implementation:** Measure the distance and angle between thumb and index tip positions. If they are close and the angle is appropriate, trigger a pinch.
-- **Justification:** This combines spatial geometry and distance, reducing false positives, and can be implemented using multiple fallback methods for position extraction.
+- **Gesture-based Ball Control**: Point with your right hand's index finger to move the ball
+- **Pinch-to-Pick**: Use your left hand to pinch and pick up the ball
+- **Dual-hand Interaction**: Right hand for pointing/directing, left hand for picking up
+- **Robust Hand Tracking**: Implemented with error handling and frame-based stability
+
+## 🛠️ Technical Implementation
+
+### Hand Tracking System
+
+The core implementation is found in `Assets/Scripts/BallBehaviour.cs`, which integrates with the Ultraleap SDK to provide:
+
+1. **Right Hand Pointing Control**
+   - Tracks index finger tip position
+   - Applies force toward finger position
+   - Includes drag effects based on hand velocity
+   - Frame-based stability (requires 5 consecutive frames)
+
+2. **Left Hand Pinch Control**
+   - Palm position-based pinch detection
+   - Pinch strength threshold system
+   - Distance-based pickup validation
+   - Kinematic physics during pinched state
+
+3. **Robust Error Handling**
+   - Hand loss tolerance (30 frames for pinch, 15 for pointing)
+   - Reflection-based API access for SDK compatibility
+   - Fallback mechanisms for missing hand data
 
 
-### C. **Open-Hand "Push" and "Pull" Gestures**
+### Key Technical Challenges Solved
 
-**Technique:** When the hand is open and moving toward/away from an object, interpret this as a push or pull interaction.
+1. **Hand Tracking Precision Issues** - Ultraleap's low precision causing jittery ball movement
+2. **Limited Field of View** - Small tracking area restricting gameplay interactions
+3. **Hand Loss Handling** - Temporary tracking loss causing abrupt control interruptions
+4. **Unstable Hand Detection** - Intermittent detection causing erratic ball behavior
+5. **Overshooting Ball Movement** - Excessive force application without distance consideration
+6. **Pinch Detection Reliability** - Difficult and inconsistent pinch gesture recognition
 
-- **Implementation:** Track palm velocity and distance to the object. If the palm moves rapidly toward the object, apply a force (push). If away, attract the object (pull).
+## 🚧 Issues Encountered and Solutions
 
-- **Justification:** Palm velocity and position are robustly available, and this gesture is intuitive and doesn’t depend on precise finger data.
+### Issue 1: Hand Tracking Precision Issues
+- **Problem**: Ultraleap's relatively low precision made fine control difficult
+- **Root Cause**: Raw sensor data caused jittery and unpredictable ball movement
+- **Solution**: Implemented smoothing algorithms and force damping
+- **Code Implementation**:
+```csharp
+// Distance-based force reduction with maximum limits
+float forceMagnitude = Mathf.Min(distance * moveForce, maxForce);
+Vector3 force = dir.normalized * forceMagnitude * Time.deltaTime;
+rb.AddForce(force, ForceMode.VelocityChange);
+```
 
-### D. **Hand Closure Percentage for Grasp**
-**Technique:** Use the "GrabStrength" or compute a closure percentage (number of fingers curled) to trigger grasp/release events.
-- **Implementation:** If "GrabStrength" isn't available, estimate using finger angles (if accessible via reflection) or fallback to palm proximity.
-- **Justification:** This avoids reliance on pinch strength, works with more SDK versions, and is robust to missing data.
+### Issue 2: Limited Field of View
+- **Problem**: Small tracking area restricted gameplay
+- **Root Cause**: Ultraleap's limited detection range when sitting close to the sensor made interactions difficult
+- **Solution**: Optimized gesture thresholds and added larger pickup distances
+- **Code Implementation**:
+```csharp
+public float pinchDistance = 2.0f; // Increased detection range
+// Fallback with larger distance for easier pickup
+startPinch = dist <= pinchDistance * 1.5f;
+```
 
-## 3. Example Implementation: Palm Hover and Push
+### Issue 3: Hand Loss Handling
+- **Problem**: Temporary hand loss caused the ball to roll away or drop even when hand was lost only for a few frames
+- **Root Cause**: No tolerance for brief tracking interruptions
+- **Solution**: Frame-based tolerance system and gradual slowdown once hand is gone
+- **Code Implementation**:
+```csharp
+public int handLostFramesTolerance = 30; // Frames to wait before releasing
+public float slowdownRate = 0.95f; // Gradual slowdown rate
 
-Below is a Unity C# script snippet that implements palm-based hover and push gestures, using robust reflection-based extraction similar to your current style.
-
-```csharp name=LeapPalmPushBehaviour.cs
-using System;
-using System.Reflection;
-using Leap;
-using UnityEngine;
-
-public class LeapPalmPushBehaviour : MonoBehaviour
+if (rightHandLostFrameCount >= rightHandLostFramesTolerance && rb != null)
 {
-    public LeapProvider leapProvider;
-    public Chirality controllingHand = Chirality.Right;
-    public float hoverDistance = 0.2f;
-    public float pushVelocityThreshold = 0.3f;
-    public float pushForce = 5f;
-    private Rigidbody rb;
-
-    void Start()
-    {
-        rb = GetComponent<Rigidbody>();
-    }
-
-    void OnEnable()
-    {
-        if (leapProvider != null) leapProvider.OnUpdateFrame += OnUpdateFrame;
-    }
-    void OnDisable()
-    {
-        if (leapProvider != null) leapProvider.OnUpdateFrame -= OnUpdateFrame;
-    }
-
-    void OnUpdateFrame(Frame frame)
-    {
-        if (frame == null) return;
-        Hand hand = frame.GetHand(controllingHand);
-        if (hand == null) return;
-
-        Vector3 palmPos;
-        if (!TryGetPalmPosition(hand, out palmPos)) return;
-
-        float dist = Vector3.Distance(transform.position, palmPos);
-
-        // Hover highlight
-        if (dist < hoverDistance)
-        {
-            // e.g., change color to highlight
-            GetComponent<Renderer>().material.color = Color.yellow;
-
-            Vector3 palmVel;
-            if (TryGetPalmVelocity(hand, out palmVel))
-            {
-                // If palm moves quickly toward the object, apply push
-                Vector3 toObject = (transform.position - palmPos).normalized;
-                float velToward = Vector3.Dot(palmVel, toObject);
-                if (velToward > pushVelocityThreshold)
-                {
-                    rb.AddForce(toObject * pushForce, ForceMode.VelocityChange);
-                }
-            }
-        }
-        else
-        {
-            // Remove highlight
-            GetComponent<Renderer>().material.color = Color.white;
-        }
-    }
-
-    bool TryGetPalmPosition(Hand hand, out Vector3 palmWorld)
-    {
-        palmWorld = Vector3.zero;
-        object palmObj = GetMemberValue(hand, "PalmPosition") ?? GetMemberValue(hand, "Palm") ?? GetMemberValue(hand, "StabilizedPalmPosition");
-        return palmObj != null && TryConvertToVector3(palmObj, out palmWorld);
-    }
-
-    bool TryGetPalmVelocity(Hand hand, out Vector3 palmVel)
-    {
-        palmVel = Vector3.zero;
-        object velObj = GetMemberValue(hand, "PalmVelocity") ?? GetMemberValue(hand, "Velocity");
-        return velObj != null && TryConvertToVector3(velObj, out palmVel);
-    }
-
-    // Use similar TryConvertToVector3 and GetMemberValue as in your snippet
-    bool TryConvertToVector3(object vecObj, out Vector3 v)
-    {
-        v = Vector3.zero;
-        if (vecObj == null) return false;
-        if (vecObj is Vector3 vec3) { v = vec3; return true; }
-        Type t = vecObj.GetType();
-        MethodInfo toVec = t.GetMethod("ToVector3", BindingFlags.Public | BindingFlags.Instance | BindingFlags.IgnoreCase);
-        if (toVec != null)
-        {
-            try
-            {
-                object result = toVec.Invoke(vecObj, null);
-                if (result is Vector3 r) { v = r; return true; }
-            }
-            catch { }
-        }
-        object ox = GetMemberValue(vecObj, "x") ?? GetMemberValue(vecObj, "X");
-        object oy = GetMemberValue(vecObj, "y") ?? GetMemberValue(vecObj, "Y");
-        object oz = GetMemberValue(vecObj, "z") ?? GetMemberValue(vecObj, "Z");
-        if (ox != null && oy != null && oz != null)
-        {
-            try
-            {
-                float fx = Convert.ToSingle(ox);
-                float fy = Convert.ToSingle(oy);
-                float fz = Convert.ToSingle(oz);
-                v = new Vector3(fx, fy, fz) * 0.001f;
-                return true;
-            }
-            catch { }
-        }
-        return false;
-    }
-
-    object GetMemberValue(object obj, string memberName)
-    {
-        if (obj == null || string.IsNullOrEmpty(memberName)) return null;
-        Type t = obj.GetType();
-        PropertyInfo pi = t.GetProperty(memberName, BindingFlags.Public | BindingFlags.Instance | BindingFlags.IgnoreCase);
-        if (pi != null) { try { return pi.GetValue(obj); } catch { } }
-        FieldInfo fi = t.GetField(memberName, BindingFlags.Public | BindingFlags.Instance | BindingFlags.IgnoreCase);
-        if (fi != null) { try { return fi.GetValue(obj); } catch { } }
-        return null;
-    }
+    rb.velocity *= slowdownRate;
+    rb.angularVelocity *= slowdownRate;
 }
 ```
 
-## 4. Conclusion
+### Issue 4: Hand Tracking Stability and Loss Handling
+- **Problem**: Intermittent hand detection and brief hand loss caused erratic ball behavior and immediate control cessation
+- **Root Cause**: Single-frame hand detection without stability checks and no tolerance for temporary tracking loss
+- **Solution**: Implemented frame-based stability system with tolerance for temporary hand loss
+- **Code Implementation**:
+```csharp
+// Stability requirements for hand detection
+public int requiredFrames = 5; // Number of frames hand must be present
+public int handLostFramesTolerance = 30; // Frames to wait before releasing
+public int rightHandLostFramesTolerance = 15; // Frames for pointing control
+public float slowdownRate = 0.95f; // Gradual slowdown rate
 
-By relying on palm-based data, angle/distance between thumb and index, and hand closure metrics, you make your interactions more robust to incomplete or varied Leap Motion data. These techniques are more reliable, intuitive, and portable across SDK versions—leading to a better user experience.
+// Right hand stability check
+if (rightHandFrameCount >= requiredFrames)
+{
+    // Only then allow hand control
+    if (TryGetIndexTipPosition(rightHand, out Vector3 tipWorld))
+    {
+        // Apply ball movement
+    }
+}
 
----
+// Left hand loss tolerance for pinch
+if (leftHandLostFrameCount >= handLostFramesTolerance)
+{
+    Debug.Log("Left hand lost for too long, releasing pinch");
+    ReleasePinch();
+}
+else
+{
+    // Keep ball at last known position while hand is temporarily lost
+    Vector3 target = lastKnownPalmPosition + pinchOffset;
+    transform.position = Vector3.Lerp(transform.position, target, Time.deltaTime * followSmoothness * 0.5f);
+}
 
-**Next Steps:**  
-- Implement the example script in your Unity project, attach it to an interactable object, and test palm-based hover and push.
-- Extend to other proposed gestures as needed.
+// Right hand loss handling with gradual slowdown
+if (rightHandLostFrameCount >= rightHandLostFramesTolerance && rb != null)
+{
+    rb.velocity *= slowdownRate;
+    rb.angularVelocity *= slowdownRate;
+}
+```
+
+### Issue 5: Overshooting Ball Movement
+- **Problem**: Ball moved too aggressively toward finger position
+- **Root Cause**: Excessive force application without distance consideration
+- **Solution**: Distance-based force damping with maximum force limits
+- **Code Implementation**:
+```csharp
+public float maxForce = 10f; // Maximum force to prevent overshooting
+
+// Reduce force based on distance to prevent overshooting
+float forceMagnitude = Mathf.Min(distance * moveForce, maxForce);
+Vector3 force = dir.normalized * forceMagnitude * Time.deltaTime;
+rb.AddForce(force, ForceMode.VelocityChange);
+```
+
+### Issue 6: Pinch Detection Reliability
+- **Problem**: Pinch gestures were difficult to perform consistently
+- **Root Cause**: High pinch strength threshold and small pickup distance
+- **Solution**: Lowered thresholds and increased detection range
+- **Code Implementation**:
+```csharp
+public float pinchThreshold = 0.5f; // Lowered from 0.8f for easier pinching
+public float pinchDistance = 2.0f; // Increased range
+
+// Lower threshold and larger distance for easier pickup
+startPinch = (pinchStrength > pinchThreshold) && dist <= pinchDistance;
+```
+
+## 🎯 Advanced Interaction Techniques
+
+### Implemented Solutions for Ultraleap Limitations
+
+#### 1. **Dual-Hand Paradigm**
+- **Rationale**: Separates control and manipulation functions
+- **Implementation**: Right hand for direction, left hand for pickup
+- **Benefit**: Reduces gesture conflicts and improves precision
+
+#### 2. **Velocity-Based Drag**
+- **Rationale**: Adds momentum to ball movement
+- **Implementation**: Tracks hand velocity and applies drag forces
+- **Benefit**: More natural and predictable ball physics
+
+#### 3. **Grace Period System**
+- **Rationale**: Prevents abrupt stops after hand interactions
+- **Implementation**: 2-second grace period after pinch release
+- **Benefit**: Smoother transition between interaction modes
+
+#### 4. **Adaptive Thresholds**
+- **Rationale**: Accommodates varying hand sizes and positions
+- **Implementation**: Multiple fallback detection methods
+- **Benefit**: Improved accessibility and reliability
+
+## 📁 Project Structure
+
+```
+Assets/
+├── Scripts/
+│   ├── BallBehaviour.cs      # Main hand tracking implementation
+│   ├── GameBehaviour.cs      # Game state management
+│   ├── CameraBehaviour.cs    # Camera controls
+│   └── UIBehaviour.cs        # User interface
+├── Scenes/                   # Unity scenes
+├── Materials/                # Ball and environment materials
+└── Samples/                  # Ultraleap SDK examples
+    └── Ultraleap Tracking/
+        └── 7.2.0/            # SDK version 7.2.0
+```
+
+## 🎮 How to Play
+
+1. **Setup**: Ensure Ultraleap device is connected and positioned correctly
+2. **Movement**: Point with your right hand's index finger to direct the ball
+3. **Pickup**: Pinch with your left hand near the ball to pick it up
+4. **Release**: Open your left hand to drop the ball
+5. **Collect**: Gather all collectible objects to win
+
+## 🔧 Setup Instructions
+
+### Prerequisites
+- Unity 2022.x
+- Ultraleap device (Leap Motion Controller)
+- Ultraleap SDK 7.2.0
+
+### Installation
+1. Clone this repository
+2. Install Ultraleap Tracking from Unity Package Manager
+3. Connect your Ultraleap device
+4. Open the project in Unity
+5. Run the main scene
+
+## 🎥 Demo
+
+Demo of the implementation is available at: https://youtu.be/XzdozDj5kb4
+
+## 🚀 Future Improvements
+
+### Proposed Enhancements
+
+1. **Gesture Recognition**
+   - Implement swipe gestures for ball launching
+   - Add hand orientation for spin control
+
+2. **Adaptive Sensitivity**
+   - Dynamic threshold adjustment based on user performance
+   - Personal calibration system
+
+3. **Visual Feedback**
+   - Hand tracking overlay in game view
+   - Gesture strength indicators
+
+4. **Multi-player Support**
+   - Two-player mode with separate hand assignment
+   - Competitive ball control
+
+## 👥 Authors
+
+Regina Zelei
+Sevda Ibrahim
+
