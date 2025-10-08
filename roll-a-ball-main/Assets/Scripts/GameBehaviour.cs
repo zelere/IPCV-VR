@@ -7,6 +7,7 @@ public class GameBehaviour : MonoBehaviour
     private GameObject collectibles;
     private GameObject player;
     private Canvas canvas;
+    private ExperimentManager experimentManager;
 
     // Start is called before the first frame update
     void Start()
@@ -14,6 +15,13 @@ public class GameBehaviour : MonoBehaviour
         collectibles = transform.Find("Collectibles").gameObject;
         player = transform.Find("Player").gameObject;
         canvas = GameObject.Find("Canvas").GetComponent<Canvas>();
+        
+        // Try to find the ExperimentManager
+        experimentManager = FindObjectOfType<ExperimentManager>();
+        if (experimentManager == null)
+        {
+            Debug.LogWarning("ExperimentManager not found! Using legacy game mode.");
+        }
     }
 
     // Update is called once per frame
@@ -24,10 +32,21 @@ public class GameBehaviour : MonoBehaviour
 
     private void StartGame()
     {
-        foreach (Transform collectible in collectibles.transform)
+        // If using ExperimentManager, let it handle collectible management
+        if (experimentManager != null)
         {
-            collectible.gameObject.SetActive(true);
+            Debug.Log("Starting game with ExperimentManager control");
+            // ExperimentManager will handle collectible activation
         }
+        else
+        {
+            // Legacy mode: activate all collectibles
+            foreach (Transform collectible in collectibles.transform)
+            {
+                collectible.gameObject.SetActive(true);
+            }
+        }
+        
         player.GetComponent<BallBehaviour>().enabled = true;
         player.transform.position = new Vector3(0, 0.5f, 0);
         canvas.transform.Find("StartMenu").gameObject.SetActive(false);

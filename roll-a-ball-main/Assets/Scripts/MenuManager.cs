@@ -104,98 +104,105 @@ public class MenuManager : MonoBehaviour
             textRect.anchoredPosition = new Vector2(0, 100);
             textRect.sizeDelta = new Vector2(300, 50);
         }
-        
-        // Create Hand Tracking Button
-        if (handTrackingButton == null)
-        {
-            handTrackingButton = CreateButton("HandTrackingButton", "Hand Tracking", new Vector2(0, 50));
-        }
-        
-        // Create Keyboard Button
-        if (keyboardButton == null)
-        {
-            keyboardButton = CreateButton("KeyboardButton", "Keyboard Controls", new Vector2(0, 0));
-        }
-        
+    
         SetupButtons();
     }
-    
-    Button CreateButton(string name, string text, Vector2 position)
-    {
-        GameObject buttonObj = new GameObject(name);
-        buttonObj.transform.SetParent(startMenu.transform, false);
-        
-        Button button = buttonObj.AddComponent<Button>();
-        Image buttonImage = buttonObj.AddComponent<Image>();
-        buttonImage.color = new Color(0.2f, 0.3f, 0.8f, 0.8f);
-        
-        // Create button text
-        GameObject textObj = new GameObject("Text");
-        textObj.transform.SetParent(buttonObj.transform, false);
-        
-        TMP_Text buttonText = textObj.AddComponent<TMP_Text>();
-        buttonText.text = text;
-        buttonText.fontSize = 18;
-        buttonText.color = Color.white;
-        buttonText.alignment = TextAlignmentOptions.Center;
-        
-        // Setup RectTransforms
-        RectTransform buttonRect = buttonObj.GetComponent<RectTransform>();
-        buttonRect.anchorMin = new Vector2(0.5f, 0.5f);
-        buttonRect.anchorMax = new Vector2(0.5f, 0.5f);
-        buttonRect.anchoredPosition = position;
-        buttonRect.sizeDelta = new Vector2(200, 40);
-        
-        RectTransform textRect = textObj.GetComponent<RectTransform>();
-        textRect.anchorMin = Vector2.zero;
-        textRect.anchorMax = Vector2.one;
-        textRect.offsetMin = Vector2.zero;
-        textRect.offsetMax = Vector2.zero;
-        
-        return button;
-    }
-    
+
     void SetupButtons()
     {
+        Debug.Log("Setting up buttons...");
+        
         // Setup button listeners
         if (handTrackingButton != null)
         {
             handTrackingButton.onClick.AddListener(() => StartWithHandTracking());
+            Debug.Log("Hand tracking button listener added successfully");
+        }
+        else
+        {
+            Debug.LogError("Hand tracking button is null! Please assign it in the inspector.");
         }
         
         if (keyboardButton != null)
         {
             keyboardButton.onClick.AddListener(() => StartWithKeyboard());
+            Debug.Log("Keyboard button listener added successfully");
+        }
+        else
+        {
+            Debug.LogError("Keyboard button is null! Please assign it in the inspector.");
         }
         
         // Update instruction text
         if (instructionText != null)
         {
             instructionText.text = "Choose your interaction method:";
+            Debug.Log("Instruction text updated");
+        }
+        else
+        {
+            Debug.LogWarning("Instruction text is null");
+        }
+        
+        // Check if gameManager is found
+        if (gameManager == null)
+        {
+            Debug.LogError("GameManager is null! Trying to find it automatically...");
+            gameManager = FindObjectOfType<GameBehaviour>();
+            if (gameManager != null)
+            {
+                Debug.Log("Found GameBehaviour component automatically");
+            }
+            else
+            {
+                Debug.LogError("Could not find GameBehaviour component in scene! Make sure it exists.");
+            }
+        }
+        else
+        {
+            Debug.Log("GameManager reference is properly set");
         }
     }
     
     public void StartWithHandTracking()
     {
-        Debug.Log("Starting game with Hand Tracking");
+        Debug.Log("=== StartWithHandTracking button clicked! ===");
+        
+        // Reset UI state before starting
+        ResetUIState();
         
         if (gameManager != null)
         {
+            Debug.Log("GameManager found, calling StartGameWithHandTracking()");
             gameManager.StartGameWithHandTracking();
         }
+        else
+        {
+            Debug.LogError("GameManager is null! Cannot start game.");
+        }
         
+        Debug.Log("Hiding start menu...");
         HideStartMenu();
     }
     
     public void StartWithKeyboard()
     {
-        Debug.Log("Starting game with Keyboard controls");
+        Debug.Log("=== StartWithKeyboard button clicked! ===");
+        
+        // Reset UI state before starting
+        ResetUIState();
         
         if (gameManager != null)
         {
+            Debug.Log("GameManager found, calling StartGameWithKeyboard()");
             gameManager.StartGameWithKeyboard();
         }
+        else
+        {
+            Debug.LogError("GameManager is null! Cannot start game.");
+        }
         
+        Debug.Log("Hiding start menu...");
         HideStartMenu();
     }
     
@@ -204,6 +211,11 @@ public class MenuManager : MonoBehaviour
         if (startMenu != null)
         {
             startMenu.SetActive(true);
+            Debug.Log("Start menu shown");
+        }
+        else
+        {
+            Debug.LogError("Start menu GameObject is null!");
         }
     }
     
@@ -212,6 +224,11 @@ public class MenuManager : MonoBehaviour
         if (startMenu != null)
         {
             startMenu.SetActive(false);
+            Debug.Log("Start menu hidden");
+        }
+        else
+        {
+            Debug.LogError("Start menu GameObject is null!");
         }
     }
     
@@ -219,5 +236,16 @@ public class MenuManager : MonoBehaviour
     public void ReturnToMenu()
     {
         ShowStartMenu();
+    }
+    
+    // Reset UI state when starting a new game
+    void ResetUIState()
+    {
+        UIBehaviour uiBehaviour = FindObjectOfType<UIBehaviour>();
+        if (uiBehaviour != null)
+        {
+            uiBehaviour.ResetGameState();
+            Debug.Log("UI state reset");
+        }
     }
 }

@@ -13,3 +13,13 @@ The independent variable in this experiment is the **interaction method**, which
 Potential parasite variables that could affect results include participants' prior gaming experience, familiarity with either input method, hand dominance for gesture-based interaction, and learning effects from repeated trials. To control these variables, we will randomize the order of interaction methods between participants, provide standardized training sessions for each input method, record participant demographics and experience levels, and use counterbalancing to minimize order effects.
 
 Based on existing literature on natural user interfaces, we hypothesize that *Leap Motion hand tracking will result in higher user satisfaction scores due to its intuitive nature, but keyboard controls will demonstrate superior performance in terms of completion time and accuracy due to the precision and familiarity of traditional input methods*. 
+
+
+## Why is the tutorial important?
+To give a fair chance of everyone unconnected to their previous experience, and to help them get used to the physics and controls of the game. This doesn't reduce the advantage experienced gamers might have over casual users, but gives an equal starting field to everyone.
+
+- Reduces learning effects during data collection
+- Ensures participant comfort with the interface
+- Provides consistent baseline for all participants
+- Eliminates confounding variables from unfamiliarity
+- Allows natural mode selection point in the experiment
