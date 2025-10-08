@@ -3013,6 +3013,15 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   leapProvider: {fileID: 1057113496}
+  moveForce: 5
+  pinchThreshold: 0.8
+  followSmoothness: 10
+  pinchDistance: 3
+  maxForce: 10
+  requiredFrames: 5
+  handLostFramesTolerance: 30
+  rightHandLostFramesTolerance: 15
+  slowdownRate: 0.95
 --- !u!1 &2098234709
 GameObject:
   m_ObjectHideFlags: 0
