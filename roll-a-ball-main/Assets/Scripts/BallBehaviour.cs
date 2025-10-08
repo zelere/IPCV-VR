@@ -22,6 +22,21 @@ public class BallBehaviour : MonoBehaviour
     public int rightHandLostFramesTolerance = 15; // Frames to wait before stopping ball when right hand is lost
     public float slowdownRate = 0.95f; // Rate at which ball slows down when hand is lost
 
+    [Header("Keyboard Controls")]
+    public float keyboardMoveForce = 4.0f; // Force applied when using keyboard (reduced from 8.0f)
+    public float keyboardMaxSpeed = 8.0f; // Maximum speed when using keyboard (reduced from 15.0f)
+    public bool enableKeyboardControls = true; // Toggle to enable/disable keyboard controls
+
+    [Header("Interaction Mode")]
+    public InteractionMode currentInteractionMode = InteractionMode.None;
+
+    public enum InteractionMode
+    {
+        None,
+        HandTracking,
+        Keyboard
+    }
+
     private bool isPinched = false;
     private Hand activeHand;
     private Vector3 pinchOffset;
@@ -45,7 +60,91 @@ public class BallBehaviour : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        // Only hand tracking controls - no keyboard input
+        // Handle interaction based on selected mode
+        if (currentInteractionMode == InteractionMode.Keyboard)
+        {
+            HandleKeyboardInteraction();
+        }
+        // Hand tracking is handled in FixedUpdate through OnUpdateFrame
+    }
+
+    void FixedUpdate()
+    {
+        // Hand tracking interaction is processed here through the Leap Motion callbacks
+        // This ensures consistent physics-based movement
+    }
+
+    public void SetInteractionMode(InteractionMode mode)
+    {
+        currentInteractionMode = mode;
+        Debug.Log($"Interaction mode set to: {mode}");
+        
+        // Reset ball state when switching modes
+        if (rb != null)
+        {
+            rb.velocity = Vector3.zero;
+            rb.angularVelocity = Vector3.zero;
+        }
+        
+        // Release pinch if switching away from hand tracking
+        if (mode != InteractionMode.HandTracking && isPinched)
+        {
+            ReleasePinch();
+        }
+    }
+
+    void HandleKeyboardInteraction()
+    {
+        if (rb == null) return;
+
+        Vector3 inputVector = Vector3.zero;
+
+        // Get input for horizontal and vertical movement
+        // WASD keys and Arrow keys
+        if (Input.GetKey(KeyCode.W) || Input.GetKey(KeyCode.UpArrow))
+            inputVector.z += 1f;
+        if (Input.GetKey(KeyCode.S) || Input.GetKey(KeyCode.DownArrow))
+            inputVector.z -= 1f;
+        if (Input.GetKey(KeyCode.A) || Input.GetKey(KeyCode.LeftArrow))
+            inputVector.x -= 1f;
+        if (Input.GetKey(KeyCode.D) || Input.GetKey(KeyCode.RightArrow))
+            inputVector.x += 1f;
+
+        // Normalize the input vector to prevent faster diagonal movement
+        if (inputVector.magnitude > 1f)
+            inputVector = inputVector.normalized;
+
+        // Apply force if there's input
+        if (inputVector != Vector3.zero)
+        {
+            // Check current speed and limit it
+            Vector3 currentVelocity = rb.velocity;
+            float currentSpeed = new Vector3(currentVelocity.x, 0, currentVelocity.z).magnitude;
+
+            if (currentSpeed < keyboardMaxSpeed)
+            {
+                Vector3 force = inputVector * keyboardMoveForce;
+                rb.AddForce(force, ForceMode.Force);
+            }
+        }
+    }
+
+    void HandleHandTrackingInteraction(Frame frame)
+    {
+        if (frame == null) return;
+
+        // Get both hands
+        Hand rightHand = frame.GetHand(Chirality.Right);
+        Hand leftHand = frame.GetHand(Chirality.Left);
+
+        // Handle pinching with left hand only
+        HandlePinching(leftHand);
+
+        // Handle pointing/movement with right hand only (but not when pinched)
+        if (!isPinched)
+        {
+            HandlePointing(rightHand);
+        }
     }
 
     private void OnEnable()
@@ -64,19 +163,10 @@ public class BallBehaviour : MonoBehaviour
     // Called every frame when Leap Motion has data
     void OnUpdateFrame(Frame frame)
     {
-        if (frame == null) return;
-
-        // Get both hands
-        Hand rightHand = frame.GetHand(Chirality.Right);
-        Hand leftHand = frame.GetHand(Chirality.Left);
-
-        // Handle pinching with left hand only
-        HandlePinching(leftHand);
-
-        // Handle pointing/movement with right hand only (but not when pinched)
-        if (!isPinched)
+        // Only process hand tracking if that's the current interaction mode
+        if (currentInteractionMode == InteractionMode.HandTracking)
         {
-            HandlePointing(rightHand);
+            HandleHandTrackingInteraction(frame);
         }
     }
 

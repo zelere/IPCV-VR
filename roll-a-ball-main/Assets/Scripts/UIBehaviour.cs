@@ -11,6 +11,8 @@ public class UIBehaviour : MonoBehaviour
     private GameObject start_menu;
     private GameObject game;
     private GameObject collectibles;
+    private MenuManager menuManager;
+    
     void Start()
     {
         text_collectibles = transform.Find("text_collectibles").gameObject.GetComponent<TMP_Text>();
@@ -18,6 +20,9 @@ public class UIBehaviour : MonoBehaviour
         start_menu = transform.Find("StartMenu").gameObject;
         game = GameObject.Find("Game");
         collectibles = game.transform.Find("Collectibles").gameObject;
+        
+        // Try to find the MenuManager component
+        menuManager = FindObjectOfType<MenuManager>();
     }
 
     // Update is called once per frame
@@ -36,7 +41,17 @@ public class UIBehaviour : MonoBehaviour
 
         if (collectibles_count == 0) {
             text_win.gameObject.SetActive(true);
-            start_menu.SetActive(true);
+            
+            // Use MenuManager if available, otherwise fallback to direct menu activation
+            if (menuManager != null)
+            {
+                menuManager.ShowStartMenu();
+            }
+            else
+            {
+                start_menu.SetActive(true);
+            }
+            
             game.transform.Find("Player").gameObject.GetComponent<BallBehaviour>().enabled = false;
         }
     }

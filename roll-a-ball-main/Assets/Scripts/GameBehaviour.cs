@@ -22,7 +22,7 @@ public class GameBehaviour : MonoBehaviour
         
     }
 
-    public void StartGame()
+    private void StartGame()
     {
         foreach (Transform collectible in collectibles.transform)
         {
@@ -31,6 +31,30 @@ public class GameBehaviour : MonoBehaviour
         player.GetComponent<BallBehaviour>().enabled = true;
         player.transform.position = new Vector3(0, 0.5f, 0);
         canvas.transform.Find("StartMenu").gameObject.SetActive(false);
+    }
+
+    public void StartGameWithHandTracking()
+    {
+        // Set interaction mode to hand tracking
+        BallBehaviour ballBehaviour = player.GetComponent<BallBehaviour>();
+        ballBehaviour.SetInteractionMode(BallBehaviour.InteractionMode.HandTracking);
+        
+        // Start the game
+        StartGame();
+        
+        Debug.Log("Game started with Hand Tracking interaction");
+    }
+
+    public void StartGameWithKeyboard()
+    {
+        // Set interaction mode to keyboard
+        BallBehaviour ballBehaviour = player.GetComponent<BallBehaviour>();
+        ballBehaviour.SetInteractionMode(BallBehaviour.InteractionMode.Keyboard);
+        
+        // Start the game
+        StartGame();
+        
+        Debug.Log("Game started with Keyboard interaction");
     }
 }
     
