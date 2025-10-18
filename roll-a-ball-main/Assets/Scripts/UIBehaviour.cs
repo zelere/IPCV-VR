@@ -5,7 +5,7 @@ using UnityEngine;
 
 public class UIBehaviour : MonoBehaviour
 {
-    [SerializeField] private string collectibleTag = "Collectible";
+    //[SerializeField] private string collectibleTag = "Collectible";
     [Header("UI Elements")]
     [SerializeField] private TMP_Text collectiblesText;
     [SerializeField] private TMP_Text victoryText;
