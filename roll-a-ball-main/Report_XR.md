@@ -70,13 +70,13 @@ The pilot successfully identified areas for improvement, confirming that refinem
 ## 🖼️ Screenshots
 
 ### Results: Time for user1 using Keyboard
-![Results Screen](../Screenshots/User1-keyboard.png.png)
+![Results Screen](../Screenshots/User1-keyboard.png)
 
 ### Results: Time for user1 using hand gestures
 ![Results Screen](../Screenshots/User1-Leapmotion.png)
 
 ### Results: Time for user2 using Keyboard
-![Results Screen](../Screenshots/User2-keyboard.png.png)
+![Results Screen](../Screenshots/User2-keyboard.png)
 
 ### Results: Time for user2 using hand gestures
 ![Results Screen](../Screenshots/User2-Leapmotion.png)
