@@ -60,6 +60,38 @@ public class MenuManager : MonoBehaviour
         }
     }
     
+    void TryFindInstructionText()
+    {
+        // Try to find instruction text by name or type
+        if (instructionText == null)
+        {
+            GameObject instructionObj = GameObject.Find("InstructionText");
+            if (instructionObj != null)
+            {
+                instructionText = instructionObj.GetComponent<TMP_Text>();
+                if (instructionText != null)
+                {
+                    Debug.Log("Found InstructionText automatically");
+                    instructionText.text = "Choose tutorial type:";
+                }
+            }
+            else
+            {
+                // Try to find any TMP_Text in the start menu
+                if (startMenu != null)
+                {
+                    TMP_Text[] texts = startMenu.GetComponentsInChildren<TMP_Text>();
+                    if (texts.Length > 0)
+                    {
+                        instructionText = texts[0]; // Use the first text component found
+                        Debug.Log("Found instruction text in start menu automatically");
+                        instructionText.text = "Choose tutorial type:";
+                    }
+                }
+            }
+        }
+    }
+    
     // Call this method if you want to create UI elements programmatically
     public void CreateUIElementsProgrammatically()
     {
@@ -93,7 +125,7 @@ public class MenuManager : MonoBehaviour
             textObj.transform.SetParent(startMenu.transform, false);
             
             instructionText = textObj.AddComponent<TMP_Text>();
-            instructionText.text = "Choose your interaction method:";
+            instructionText.text = "Choose tutorial type:";
             instructionText.fontSize = 24;
             instructionText.color = Color.white;
             instructionText.alignment = TextAlignmentOptions.Center;
@@ -136,12 +168,13 @@ public class MenuManager : MonoBehaviour
         // Update instruction text
         if (instructionText != null)
         {
-            instructionText.text = "Choose your interaction method:";
+            instructionText.text = "Choose tutorial type:";
             Debug.Log("Instruction text updated");
         }
         else
         {
-            Debug.LogWarning("Instruction text is null");
+            Debug.LogWarning("Instruction text is null - trying to find it automatically");
+            TryFindInstructionText();
         }
         
         // Check if gameManager is found
@@ -166,19 +199,19 @@ public class MenuManager : MonoBehaviour
     
     public void StartWithHandTracking()
     {
-        Debug.Log("=== StartWithHandTracking button clicked! ===");
+        Debug.Log("=== StartWithHandTracking tutorial clicked! ===");
         
         // Reset UI state before starting
         ResetUIState();
         
         if (gameManager != null)
         {
-            Debug.Log("GameManager found, calling StartGameWithHandTracking()");
-            gameManager.StartGameWithHandTracking();
+            Debug.Log("GameManager found, calling StartTutorialWithHandTracking()");
+            gameManager.StartTutorialWithHandTracking();
         }
         else
         {
-            Debug.LogError("GameManager is null! Cannot start game.");
+            Debug.LogError("GameManager is null! Cannot start tutorial.");
         }
         
         Debug.Log("Hiding start menu...");
@@ -187,19 +220,19 @@ public class MenuManager : MonoBehaviour
     
     public void StartWithKeyboard()
     {
-        Debug.Log("=== StartWithKeyboard button clicked! ===");
+        Debug.Log("=== StartWithKeyboard tutorial clicked! ===");
         
         // Reset UI state before starting
         ResetUIState();
         
         if (gameManager != null)
         {
-            Debug.Log("GameManager found, calling StartGameWithKeyboard()");
-            gameManager.StartGameWithKeyboard();
+            Debug.Log("GameManager found, calling StartTutorialWithKeyboard()");
+            gameManager.StartTutorialWithKeyboard();
         }
         else
         {
-            Debug.LogError("GameManager is null! Cannot start game.");
+            Debug.LogError("GameManager is null! Cannot start tutorial.");
         }
         
         Debug.Log("Hiding start menu...");

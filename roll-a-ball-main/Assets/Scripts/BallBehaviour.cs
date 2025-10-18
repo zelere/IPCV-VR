@@ -54,11 +54,32 @@ public class BallBehaviour : MonoBehaviour
         {
             currentHandler = h;
             currentHandler.EnterMode(this);
+            Debug.Log($"Successfully set interaction mode to: {mode}");
         }
-        else currentHandler = null;
+        else 
+        {
+            currentHandler = null;
+            Debug.LogError($"No handler found for interaction mode: {mode}");
+        }
 
         Stop();
-        Debug.Log($"Interaction mode set to: {mode}");
+        
+        // Additional debug info for hand tracking
+        if (mode == InteractionMode.HandTracking)
+        {
+            if (leapProvider == null)
+            {
+                leapProvider = FindFirstObjectByType<LeapProvider>();
+                if (leapProvider == null)
+                {
+                    Debug.LogError("LeapProvider not found! Hand tracking will not work. Please ensure Ultraleap SDK is properly set up.");
+                }
+                else
+                {
+                    Debug.Log("LeapProvider found: " + leapProvider.name);
+                }
+            }
+        }
     }
     public void ApplyForce(Vector3 force, ForceMode forcemode)
     {
