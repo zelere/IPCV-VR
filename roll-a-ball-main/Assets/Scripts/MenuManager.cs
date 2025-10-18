@@ -244,7 +244,7 @@ public class MenuManager : MonoBehaviour
         UIBehaviour uiBehaviour = FindObjectOfType<UIBehaviour>();
         if (uiBehaviour != null)
         {
-            uiBehaviour.ResetGameState();
+            //uiBehaviour.ResetGameState();
             Debug.Log("UI state reset");
         }
     }

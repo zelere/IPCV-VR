@@ -1,27 +1,32 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using TMPro;
+using UnityEngine.Rendering;
 
 public class GameBehaviour : MonoBehaviour
 {
-    private GameObject collectibles;
-    private GameObject player;
-    private Canvas canvas;
-    private ExperimentManager experimentManager;
+    [SerializeField] private GameObject startMenu;
+    [SerializeField] private GameObject player;
+    [SerializeField] private MonoBehaviour playerScript;
+
+
+    [SerializeField] private string collectibleTag = "Collectible";
+
+    private Vector3 playerStartPosition;
+    private Quaternion playerStartRotation;
+    private GameObject[] collectibles;
 
     // Start is called before the first frame update
     void Start()
     {
-        collectibles = transform.Find("Collectibles").gameObject;
-        player = transform.Find("Player").gameObject;
-        canvas = GameObject.Find("Canvas").GetComponent<Canvas>();
-        
-        // Try to find the ExperimentManager
-        experimentManager = FindObjectOfType<ExperimentManager>();
-        if (experimentManager == null)
-        {
-            Debug.LogWarning("ExperimentManager not found! Using legacy game mode.");
-        }
+        playerStartPosition = player.transform.position;
+        playerStartRotation = player.transform.rotation;
+
+        collectibles = GameObject.FindGameObjectsWithTag(collectibleTag);
+
+        playerScript.enabled = false;
+        startMenu.SetActive(true);
     }
 
     // Update is called once per frame
@@ -32,24 +37,18 @@ public class GameBehaviour : MonoBehaviour
 
     private void StartGame()
     {
-        // If using ExperimentManager, let it handle collectible management
-        if (experimentManager != null)
+        player.transform.position = playerStartPosition;
+        player.transform.rotation = playerStartRotation;
+        player.GetComponent<Rigidbody>().velocity = Vector3.zero;
+
+
+        foreach (GameObject collectible in collectibles)
         {
-            Debug.Log("Starting game with ExperimentManager control");
-            // ExperimentManager will handle collectible activation
+            collectible.SetActive(true);
         }
-        else
-        {
-            // Legacy mode: activate all collectibles
-            foreach (Transform collectible in collectibles.transform)
-            {
-                collectible.gameObject.SetActive(true);
-            }
-        }
-        
-        player.GetComponent<BallBehaviour>().enabled = true;
-        player.transform.position = new Vector3(0, 0.5f, 0);
-        canvas.transform.Find("StartMenu").gameObject.SetActive(false);
+
+        playerScript.enabled = true;
+        startMenu.SetActive(false);
     }
 
     public void StartGameWithHandTracking()
@@ -74,6 +73,13 @@ public class GameBehaviour : MonoBehaviour
         StartGame();
         
         Debug.Log("Game started with Keyboard interaction");
+    }
+
+    public void startOver()
+    {
+        playerScript.enabled = false;
+        startMenu.SetActive(true);
+
     }
 }
     

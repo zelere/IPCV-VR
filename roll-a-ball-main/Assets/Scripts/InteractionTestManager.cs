@@ -73,7 +73,7 @@ public class InteractionTestManager : MonoBehaviour
         Debug.Log("=== Testing Mode Switch ===");
         
         // Switch between modes
-        if (ballBehaviour.currentInteractionMode == BallBehaviour.InteractionMode.HandTracking)
+        if (ballBehaviour.currentMode == BallBehaviour.InteractionMode.HandTracking)
         {
             TestKeyboardMode();
         }
@@ -88,7 +88,7 @@ public class InteractionTestManager : MonoBehaviour
         if (ballBehaviour == null) return;
         
         Debug.Log($"=== Current Mode Info ===");
-        Debug.Log($"Current Interaction Mode: {ballBehaviour.currentInteractionMode}");
+        Debug.Log($"Current Interaction Mode: {ballBehaviour.currentMode}");
         Debug.Log($"Ball Position: {ballBehaviour.transform.position}");
         Debug.Log($"Ball Velocity: {ballBehaviour.GetComponent<Rigidbody>().velocity}");
     }
@@ -107,7 +107,7 @@ public class InteractionTestManager : MonoBehaviour
     {
         GUILayout.BeginArea(new Rect(10, 10, 300, 200));
         GUILayout.Label("=== Interaction Test Manager ===");
-        GUILayout.Label($"Current Mode: {(ballBehaviour ? ballBehaviour.currentInteractionMode.ToString() : "N/A")}");
+        GUILayout.Label($"Current Mode: {(ballBehaviour ? ballBehaviour.currentMode.ToString() : "N/A")}");
         GUILayout.Space(10);
         
         GUILayout.Label("Manual Testing:");
