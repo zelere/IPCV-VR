@@ -17,6 +17,12 @@ public class GameBehaviour : MonoBehaviour
     private Quaternion playerStartRotation;
     private GameObject[] collectibles;
 
+
+    // Tracks how many collectibles have been collected
+    private int currentCollectibleIndex = 0;
+    private float gameStartTime; // Track when the game starts
+
+
     // Start is called before the first frame update
     void Start()
     {
@@ -27,6 +33,8 @@ public class GameBehaviour : MonoBehaviour
 
         playerScript.enabled = false;
         startMenu.SetActive(true);
+        // Deactivate all collectibles before the game starts
+        HideAllCollectibles();
     }
 
     // Update is called once per frame
@@ -35,20 +43,55 @@ public class GameBehaviour : MonoBehaviour
         
     }
 
+    // Hide all collectibles
+    private void HideAllCollectibles()
+    {
+        foreach (GameObject collectible in collectibles)
+        {
+            collectible.SetActive(false);
+        }
+    }
+
     private void StartGame()
     {
         player.transform.position = playerStartPosition;
         player.transform.rotation = playerStartRotation;
         player.GetComponent<Rigidbody>().velocity = Vector3.zero;
+        // Reset sequence
+        currentCollectibleIndex = 0;
+        // Record start time
+        gameStartTime = Time.time;
 
 
-        foreach (GameObject collectible in collectibles)
-        {
-            collectible.SetActive(true);
-        }
+        // Activate the first collectible
+        if (collectibles.Length > 0)
+            collectibles[0].SetActive(true);
+
 
         playerScript.enabled = true;
         startMenu.SetActive(false);
+    }
+
+    // Call this method when a collectible is collected
+    public void CollectibleCollected()
+    {
+        if (currentCollectibleIndex < collectibles.Length)
+        {
+            collectibles[currentCollectibleIndex].SetActive(false);
+        }
+
+        currentCollectibleIndex++;
+
+        if (currentCollectibleIndex < collectibles.Length)
+        {
+            collectibles[currentCollectibleIndex].SetActive(true);
+        }
+        else
+        {
+            // Game finished: compute total time
+            float totalTime = Time.time - gameStartTime;
+            Debug.Log("--> Game finished! Total time: " + totalTime + " seconds");
+        }
     }
 
     public void StartGameWithHandTracking()

@@ -21,6 +21,7 @@ public class CubeBehaviour : MonoBehaviour
         if (other.name == "Player")
         {
             FindFirstObjectByType<UIBehaviour>().OnCollectiblesPicked();
+            FindFirstObjectByType<GameBehaviour>().CollectibleCollected();
             gameObject.SetActive(false);
         }
     }

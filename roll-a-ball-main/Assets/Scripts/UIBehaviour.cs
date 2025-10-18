@@ -18,7 +18,7 @@ public class UIBehaviour : MonoBehaviour
 
         victoryText.gameObject.SetActive(false);
 
-        numCollectibles = GameObject.FindGameObjectsWithTag(collectibleTag).Length;
+        numCollectibles = 12;
         originalNumCollectibles = numCollectibles;
 
         UpdateCollectiblesText();

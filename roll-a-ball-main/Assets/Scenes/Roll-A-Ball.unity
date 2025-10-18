@@ -170,7 +170,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   startMenu: {fileID: 2098234709}
-  gameoverText: {fileID: 0}
   player: {fileID: 1884348091}
   playerScript: {fileID: 1884348097}
   collectibleTag: Collectible
@@ -189,7 +188,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &14009375
 Transform:
   m_ObjectHideFlags: 0
@@ -2174,7 +2173,6 @@ MonoBehaviour:
   collectibleTag: Collectible
   collectiblesText: {fileID: 1251658090}
   victoryText: {fileID: 1411437353}
-  gameoverText: {fileID: 0}
 --- !u!1001 &1195233149
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -2341,7 +2339,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 200, y: -100}
+  m_AnchoredPosition: {x: -200, y: 500}
   m_SizeDelta: {x: 500, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1251658090
@@ -2391,13 +2389,13 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 36
-  m_fontSizeBase: 36
+  m_fontSize: 48
+  m_fontSizeBase: 48
   m_fontWeight: 400
   m_enableAutoSizing: 0
   m_fontSizeMin: 18
   m_fontSizeMax: 72
-  m_fontStyle: 0
+  m_fontStyle: 1
   m_HorizontalAlignment: 1
   m_VerticalAlignment: 256
   m_textAlignment: 65535
