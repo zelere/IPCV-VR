@@ -24,6 +24,10 @@ To give a fair chance of everyone unconnected to their previous experience, and 
 - Eliminates confounding variables from unfamiliarity
 - Allows natural mode selection point in the experiment
 
+## Pilot Study Setup
+
+- Do a short tutorial for both controls (keyboard and Leap Motion) by collecting 4 items. The order is the same for all participants. They can repeat each tutorial as needed.
+- Do one timed run for each keyboard and Leap Motion. The order is random. Each run you collect 12 items.
 
 ## 📊 Pilot Study Results
 
