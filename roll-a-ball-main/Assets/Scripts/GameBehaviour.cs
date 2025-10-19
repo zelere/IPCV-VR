@@ -41,7 +41,7 @@ public class GameBehaviour : MonoBehaviour
     private BallBehaviour.InteractionMode secondStudyMode;
     
     [Header("Development/Testing")]
-    [SerializeField] private bool mockHandTracking = true; // Enable to test without hand tracking sensor
+    [SerializeField] private bool mockHandTracking = false; // Enable to test without hand tracking sensor
 
     // Tracks how many collectibles have been collected
     private int currentCollectibleIndex = 0;
