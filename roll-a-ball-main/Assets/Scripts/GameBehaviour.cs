@@ -456,11 +456,13 @@ public class GameBehaviour : MonoBehaviour
                                                        "(Using keyboard for testing)\n" +
                                                        "Use WASD to simulate hand movement\n" +
                                                        "Collect all collectibles as quickly as possible";
-                }
+                    handTrackingInstructionsText.text = $"{studyNumber} STUDY - HAND TRACKING\n\n" +
+                                                       "Move the ball with pointing with your right hand. \n Pick up the ball by pinching with left hand.\n" +
+                                                       "Collect all collectibles as quickly as possible";}
                 else
                 {
                     handTrackingInstructionsText.text = $"{studyNumber} STUDY - HAND TRACKING\n\n" +
-                                                       "Move your hand above the ball\n" +
+                                                       "Move the ball with pointing with your right hand. \n Pick up the ball by pinching with left hand.\n" +
                                                        "Collect all collectibles as quickly as possible";
                 }
                 Debug.Log($"Set hand tracking instructions: {handTrackingInstructionsText.text}");
@@ -546,11 +548,14 @@ public class GameBehaviour : MonoBehaviour
                                                    "(Using keyboard for testing)\n" +
                                                    "Use WASD to simulate hand movement\n" +
                                                    "Collect all collectibles";
+                handTrackingInstructionsText.text = $"HAND TRACKING\n\n" +
+                                        "Move the ball with pointing with your right hand. \n Pick up the ball by pinching with left hand.\n" +
+                                        "Collect all collectibles";
             }
             else
             {
-                handTrackingInstructionsText.text = "HAND TRACKING GAME\n\n" +
-                                                   "Move your hand above the ball\n" +
+                handTrackingInstructionsText.text = "HAND TRACKING GAME\n\n"  +
+                                                   "Move the ball with pointing with your right hand. \n Pick up the ball by pinching with left hand.\n" +
                                                    "Collect all collectibles";
             }
         }

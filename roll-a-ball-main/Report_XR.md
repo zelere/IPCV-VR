@@ -73,6 +73,10 @@ The pilot successfully identified areas for improvement, confirming that refinem
 
 ## 🖼️ Screenshots
 
+### Tutorial
+
+![alt text](../Screenshots/keyboard_tutorial.png)
+
 ### Results: Time for user1 using Keyboard
 ![Results Screen](../Screenshots/User1-keyboard.png)
 
@@ -84,3 +88,5 @@ The pilot successfully identified areas for improvement, confirming that refinem
 
 ### Results: Time for user2 using hand gestures
 ![Results Screen](../Screenshots/User2-Leapmotion.png)
+
+
