@@ -91,5 +91,10 @@ public class BallBehaviour : MonoBehaviour
         rb.velocity *= rate;
         rb.angularVelocity *= rate;
     }
+
+    public InteractionMode GetInteractionMode()
+    {
+        return currentMode;
+    }
 }
 

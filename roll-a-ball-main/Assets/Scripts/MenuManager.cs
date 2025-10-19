@@ -10,6 +10,9 @@ public class MenuManager : MonoBehaviour
     public Button handTrackingButton;
     public Button keyboardButton;
     public GameObject startMenu;
+
+    public Button startStudyButton;
+
     public TMP_Text instructionText;
     
     [Header("Game References")]
@@ -20,93 +23,11 @@ public class MenuManager : MonoBehaviour
         SetupButtons();
         ShowStartMenu();
         
-        // If buttons are not assigned, try to find them or create them
-        if (handTrackingButton == null || keyboardButton == null)
-        {
-            Debug.LogWarning("Buttons not assigned in MenuManager. Looking for existing buttons or consider using CreateUIElementsProgrammatically()");
-            TryFindExistingButtons();
-        }
+
     }
     
-    void TryFindExistingButtons()
-    {
-        // Try to find buttons by name
-        if (handTrackingButton == null)
-        {
-            GameObject handTrackingObj = GameObject.Find("HandTrackingButton");
-            if (handTrackingObj != null)
-                handTrackingButton = handTrackingObj.GetComponent<Button>();
-        }
-        
-        if (keyboardButton == null)
-        {
-            GameObject keyboardObj = GameObject.Find("KeyboardButton");
-            if (keyboardObj != null)
-                keyboardButton = keyboardObj.GetComponent<Button>();
-        }
-        
-        // Try to find start menu if not assigned
-        if (startMenu == null)
-        {
-            GameObject startMenuObj = GameObject.Find("StartMenu");
-            if (startMenuObj != null)
-                startMenu = startMenuObj;
-        }
-        
-        // Try to find game manager if not assigned
-        if (gameManager == null)
-        {
-            gameManager = FindObjectOfType<GameBehaviour>();
-        }
-    }
+
     
-    // Call this method if you want to create UI elements programmatically
-    public void CreateUIElementsProgrammatically()
-    {
-        // Find or create Canvas
-        Canvas canvas = FindObjectOfType<Canvas>();
-        if (canvas == null)
-        {
-            GameObject canvasObj = new GameObject("Canvas");
-            canvas = canvasObj.AddComponent<Canvas>();
-            canvas.renderMode = RenderMode.ScreenSpaceOverlay;
-            canvasObj.AddComponent<UnityEngine.UI.CanvasScaler>();
-            canvasObj.AddComponent<UnityEngine.UI.GraphicRaycaster>();
-        }
-        
-        // Create or find StartMenu
-        if (startMenu == null)
-        {
-            startMenu = new GameObject("StartMenu");
-            startMenu.transform.SetParent(canvas.transform, false);
-            
-            RectTransform rect = startMenu.AddComponent<RectTransform>();
-            rect.anchorMin = new Vector2(0.5f, 0.5f);
-            rect.anchorMax = new Vector2(0.5f, 0.5f);
-            rect.anchoredPosition = Vector2.zero;
-        }
-        
-        // Create instruction text
-        if (instructionText == null)
-        {
-            GameObject textObj = new GameObject("InstructionText");
-            textObj.transform.SetParent(startMenu.transform, false);
-            
-            instructionText = textObj.AddComponent<TMP_Text>();
-            instructionText.text = "Choose your interaction method:";
-            instructionText.fontSize = 24;
-            instructionText.color = Color.white;
-            instructionText.alignment = TextAlignmentOptions.Center;
-            
-            RectTransform textRect = textObj.GetComponent<RectTransform>();
-            textRect.anchorMin = new Vector2(0.5f, 0.5f);
-            textRect.anchorMax = new Vector2(0.5f, 0.5f);
-            textRect.anchoredPosition = new Vector2(0, 100);
-            textRect.sizeDelta = new Vector2(300, 50);
-        }
-    
-        SetupButtons();
-    }
 
     void SetupButtons()
     {
@@ -131,6 +52,16 @@ public class MenuManager : MonoBehaviour
         else
         {
             Debug.LogError("Keyboard button is null! Please assign it in the inspector.");
+        }
+        
+        if (startStudyButton != null)
+        {
+            startStudyButton.onClick.AddListener(() => StartTutorial());
+            Debug.Log("Start study button listener added successfully");
+        }
+        else
+        {
+            Debug.LogError("Start study button is null! Please assign it in the inspector.");
         }
         
         // Update instruction text
@@ -200,6 +131,27 @@ public class MenuManager : MonoBehaviour
         else
         {
             Debug.LogError("GameManager is null! Cannot start game.");
+        }
+        
+        Debug.Log("Hiding start menu...");
+        HideStartMenu();
+    }
+    
+    public void StartTutorial()
+    {
+        Debug.Log("=== StartTutorial button clicked! ===");
+        
+        // Reset UI state before starting
+        ResetUIState();
+        
+        if (gameManager != null)
+        {
+            Debug.Log("GameManager found, calling StartSequentialTutorials()");
+            gameManager.StartSequentialTutorials();
+        }
+        else
+        {
+            Debug.LogError("GameManager is null! Cannot start tutorial.");
         }
         
         Debug.Log("Hiding start menu...");
